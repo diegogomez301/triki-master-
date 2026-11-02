@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="cyber">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Triki Master | Tres en Raya Pro</title>
+  <meta name="description" content="Juego de Triki (Tres en raya) web interactivo con modos contra amigos o contra IA invencible, efectos de sonido y temas visuales.">
+
+  <!-- ═══════════════════════════════════════════════
+       PWA — Manifest e iconos
+  ════════════════════════════════════════════════ -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Android / Chrome theme color -->
+  <meta name="theme-color" content="#1a1635">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- Apple / iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Triki Master">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+  <!-- Open Graph (preview al compartir enlace) -->
+  <meta property="og:title" content="Triki Master">
+  <meta property="og:description" content="Juega Triki contra amigos o contra la IA. Instálalo gratis en tu celular.">
+  <meta property="og:type" content="website">
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Canvas de fondo para partículas/confeti -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-mark x">X</span>
+        <span class="logo-text">TRIKI</span>
+        <span class="logo-mark o">O</span>
+        <span class="badge">PRO</span>
+      </div>
+      
+      <div class="header-controls">
+        <!-- Botón instalación PWA (visible solo cuando el navegador lo permite) -->
+        <button id="pwa-install-btn" class="install-pill-btn hidden" title="Instalar app en tu celular" aria-label="Instalar aplicación">
+          📲 Instalar
+        </button>
+        <button id="theme-btn" class="icon-btn" title="Cambiar tema" aria-label="Cambiar tema">
+          <svg class="icon" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.58 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+          </svg>
+        </button>
+        <button id="sound-btn" class="icon-btn" title="Activar/Silenciar sonido" aria-label="Sonido">
+          <span class="sound-icon sound-on">🔊</span>
+          <span class="sound-icon sound-off hidden">🔇</span>
+        </button>
+        <button id="settings-btn" class="icon-btn" title="Configuración de jugadores" aria-label="Configuración">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- Barra de Selección de Modo -->
+    <section class="mode-selector-card">
+      <div class="tabs">
+        <button class="tab-btn active" data-mode="pvp">
+          <span class="tab-icon">👥</span> 2 Jugadores
+        </button>
+        <button class="tab-btn" data-mode="ai">
+          <span class="tab-icon">🤖</span> Contra IA
+        </button>
+      </div>
+
+      <!-- Selector de dificultad (visible sólo en modo IA) -->
+      <div id="ai-difficulty-container" class="difficulty-picker hidden">
+        <span class="picker-label">Dificultad IA:</span>
+        <div class="difficulty-options">
+          <button class="diff-btn" data-diff="easy">Fácil</button>
+          <button class="diff-btn active" data-diff="medium">Medio</button>
+          <button class="diff-btn hard" data-diff="impossible">Invencible 🔥</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Marcadores -->
+    <section class="scoreboard">
+      <div class="score-card player-x active-turn" id="card-x">
+        <div class="player-avatar">X</div>
+        <div class="player-info">
+          <span class="player-name" id="name-x-display">Jugador 1</span>
+          <span class="score-val" id="score-x">0</span>
+        </div>
+      </div>
+
+      <div class="score-card ties" id="card-ties">
+        <div class="player-avatar">⚖️</div>
+        <div class="player-info">
+          <span class="player-name">Empates</span>
+          <span class="score-val" id="score-ties">0</span>
+        </div>
+      </div>
+
+      <div class="score-card player-o" id="card-o">
+        <div class="player-avatar">O</div>
+        <div class="player-info">
+          <span class="player-name" id="name-o-display">Jugador 2</span>
+          <span class="score-val" id="score-o">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Indicador de Turno -->
+    <div class="turn-banner" id="turn-banner">
+      Turno de: <strong id="current-player-text" class="turn-symbol x">X</strong>
+    </div>
+
+    <!-- Tablero de Triki -->
+    <main class="board-wrapper">
+      <div class="board" id="board" role="grid" aria-label="Tablero de Triki">
+        <button class="cell" data-index="0" aria-label="Casilla 1"></button>
+        <button class="cell" data-index="1" aria-label="Casilla 2"></button>
+        <button class="cell" data-index="2" aria-label="Casilla 3"></button>
+        <button class="cell" data-index="3" aria-label="Casilla 4"></button>
+        <button class="cell" data-index="4" aria-label="Casilla 5"></button>
+        <button class="cell" data-index="5" aria-label="Casilla 6"></button>
+        <button class="cell" data-index="6" aria-label="Casilla 7"></button>
+        <button class="cell" data-index="7" aria-label="Casilla 8"></button>
+        <button class="cell" data-index="8" aria-label="Casilla 9"></button>
+
+        <!-- Línea ganadora animada SVG -->
+        <svg class="winning-line-svg" id="winning-svg" aria-hidden="true">
+          <line id="winning-line" x1="0" y1="0" x2="0" y2="0" stroke="currentColor" stroke-width="8" stroke-linecap="round" />
+        </svg>
+      </div>
+    </main>
+
+    <!-- Controles de la partida -->
+    <footer class="game-controls">
+      <button id="undo-btn" class="action-btn secondary" title="Deshacer jugada">
+        ↩️ Deshacer
+      </button>
+      <button id="reset-round-btn" class="action-btn primary">
+        🔄 Nueva Partida
+      </button>
+      <button id="reset-all-btn" class="action-btn secondary" title="Reiniciar marcador">
+        🗑️ Reiniciar Puntos
+      </button>
+    </footer>
+  </div>
+
+  <!-- ─── Modal de Fin de Partida ─────────────────────────────── -->
+  <div class="modal-overlay hidden" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="result-icon" id="modal-icon">🏆</div>
+      <h2 class="result-title" id="modal-title">¡Jugador X Gana!</h2>
+      <p class="result-subtitle" id="modal-subtitle">¡Una partida brillante!</p>
+      <div class="modal-actions">
+        <button id="modal-play-again" class="action-btn primary large">Jugar Otra Vez</button>
+        <button id="modal-close" class="action-btn secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal de Configuración ──────────────────────────────── -->
+  <div class="modal-overlay hidden" id="settings-modal" role="dialog" aria-modal="true">
+    <div class="modal-card settings-card">
+      <div class="modal-header">
+        <h3>⚙️ Configuración</h3>
+        <button id="close-settings" class="close-x" aria-label="Cerrar">&times;</button>
+      </div>
+      <form id="settings-form" class="settings-form">
+        <div class="form-group">
+          <label for="input-name-x">Nombre Jugador X (Primer turno):</label>
+          <input type="text" id="input-name-x" maxlength="15" value="Jugador 1" placeholder="Ej. Alex">
+        </div>
+        <div class="form-group">
+          <label for="input-name-o">Nombre Jugador O:</label>
+          <input type="text" id="input-name-o" maxlength="15" value="Jugador 2" placeholder="Ej. Sofia">
+        </div>
+        <div class="form-group">
+          <label>Tema de Interfaz:</label>
+          <div class="theme-selector-grid">
+            <button type="button" class="theme-choice active" data-theme-val="cyber">
+              <span class="preview-dot cyber"></span> Cyber Neón
+            </button>
+            <button type="button" class="theme-choice" data-theme-val="light">
+              <span class="preview-dot light"></span> Glass Claro
+            </button>
+            <button type="button" class="theme-choice" data-theme-val="arcade">
+              <span class="preview-dot arcade"></span> Retro Arcade
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="action-btn primary full-width">Guardar Cambios</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── Modal instrucciones iOS ─────────────────────────────── -->
+  <div class="modal-overlay hidden" id="ios-install-modal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="result-icon">📲</div>
+      <h3 class="result-title" style="font-size:1.3rem;">Instalar en iPhone o iPad</h3>
+      <div style="text-align:left;margin:16px 0;display:flex;flex-direction:column;gap:12px;font-size:0.9rem;color:var(--text-muted);">
+        <p>1️⃣ Asegúrate de abrir este enlace en <strong>Safari</strong> (no Chrome).</p>
+        <p>2️⃣ Toca el ícono de <strong>Compartir</strong> <span style="font-size:1.1em">⬆️</span> en la barra inferior.</p>
+        <p>3️⃣ Desliza y elige <strong>"Agregar a la pantalla de inicio"</strong>.</p>
+        <p>4️⃣ Toca <strong>"Agregar"</strong> en la esquina superior derecha.</p>
+      </div>
+      <div class="modal-actions">
+        <button id="close-ios-modal" class="action-btn primary full-width">¡Entendido!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

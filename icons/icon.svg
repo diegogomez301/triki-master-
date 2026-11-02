@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="20%" r="80%">
+      <stop offset="0%" stop-color="#1a1635" />
+      <stop offset="100%" stop-color="#0c0d16" />
+    </radialGradient>
+    <filter id="glowX" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glowO" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fondo con bordes redondeados tipo icono de app -->
+  <rect width="512" height="512" rx="105" fill="url(#bgGrad)" />
+  <rect x="2" y="2" width="508" height="508" rx="103" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4" />
+
+  <!-- Líneas sutiles de cuadrícula de triki -->
+  <line x1="184" y1="80" x2="184" y2="432" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round" />
+  <line x1="328" y1="80" x2="328" y2="432" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round" />
+  <line x1="80" y1="184" x2="432" y2="184" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round" />
+  <line x1="80" y1="328" x2="432" y2="328" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round" />
+
+  <!-- Símbolo X Neón -->
+  <g filter="url(#glowX)" stroke="#00f0ff" stroke-width="32" stroke-linecap="round">
+    <line x1="100" y1="100" x2="164" y2="164" />
+    <line x1="164" y1="100" x2="100" y2="164" />
+    <line x1="220" y1="220" x2="292" y2="292" />
+    <line x1="292" y1="220" x2="220" y2="292" />
+  </g>
+
+  <!-- Símbolo O Neón -->
+  <g filter="url(#glowO)">
+    <circle cx="380" cy="132" r="32" fill="none" stroke="#ff2a85" stroke-width="28" />
+    <circle cx="132" cy="380" r="32" fill="none" stroke="#ff2a85" stroke-width="28" />
+  </g>
+</svg>
